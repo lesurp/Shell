@@ -10,6 +10,7 @@
 
 #include <stdbool.h>
 #include <unistd.h>
+#include <signal.h>
 
 #include "functions.h"
 
@@ -95,9 +96,15 @@ getcmd(char *buf, int nbuf)
 	return 0;
 }
 
+pid_t* backgroundPidsList;
+int sizePidsList = 0;
+
 	int
 main(void)
 {
+
+	signal(SIGCHLD, backgroundHandler);
+
 	// Read and run input commands.
 	char buf[100];
 	while(getcmd(buf, sizeof(buf)) >= 0){
@@ -119,6 +126,7 @@ main(void)
 				wait(&pid);
 			}
 			else {
+				addPidToList(backgroundPidsList, sizePidsList, pid);
 				if(pid == 0) {
 					setpgrp();
 					runcmd(parsecmd(buf));
