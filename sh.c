@@ -8,6 +8,11 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
+#include <stdbool.h>
+#include <unistd.h>
+
+#include "functions.h"
+
 #define MAXARGS 10
 
 // All commands have at least a type. Have looked at the type, the code
@@ -58,8 +63,7 @@ runcmd(struct cmd *cmd)
 			ecmd = (struct execcmd*)cmd;
 			if(ecmd->argv[0] == 0)
 				exit(0);
-			fprintf(stderr, "exec not implemented\n");
-			// Your code here ...
+			execvp(ecmd->argv[0],ecmd->argv);
 			break;
 
 		case '>':
@@ -76,9 +80,6 @@ runcmd(struct cmd *cmd)
 			// Your code here ...
 			break;
 
-		case '&':
-			//  	bcmd = (struct ba
-			break;
 	}
 	exit(0);
 }
@@ -105,10 +106,24 @@ main(void)
 			if(chdir(buf+3) < 0)
 				fprintf(stderr, "cannot cd %s\n", buf+3);
 		} else {
+
+			buf[strlen(buf)-1] = 0;  // chop \n
+
+			// see if it needs to run in the background
+			bool runInBackground = isBackgroundProc(buf, sizeof(buf));
 			int pid = fork1();
-			if(pid == 0)
-				runcmd(parsecmd(buf));
-			wait(&pid);
+
+			if(!runInBackground) { 
+				if(pid == 0)
+					runcmd(parsecmd(buf));
+				wait(&pid);
+			}
+			else {
+				if(pid == 0) {
+					setpgrp();
+					runcmd(parsecmd(buf));
+				}
+			}
 		}
 	}
 
