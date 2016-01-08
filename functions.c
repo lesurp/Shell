@@ -10,7 +10,7 @@ bool isBackgroundProc(char* buf, int nbf) {
 	}
 }
 
-void backgroundHandler(int status) {
+void backgroundHandler(int signum) {
 	pid_t pid;
 	while ( (pid = waitpid(-1, NULL, WNOHANG)) > 0) {
 		if(isInTheList(backgroundPidsList,sizePidsList,pid)) {
@@ -18,6 +18,12 @@ void backgroundHandler(int status) {
 		}
 		continue;
 	}
+}
+
+void foregroundHandler(int signum) {
+	if(signum == SIGINT) 
+		kill(foregroundPid, SIGINT);
+
 }
 
 void addPidToList(pid_t* pidList, int size, pid_t pid) {

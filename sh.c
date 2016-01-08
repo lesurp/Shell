@@ -98,31 +98,33 @@ getcmd(char *buf, int nbuf)
 
 pid_t* backgroundPidsList;
 int sizePidsList = 0;
+pid_t foregroundPid;
 
 	int
 main(void)
 {
-
 	signal(SIGCHLD, backgroundHandler);
+	signal(SIGINT, foregroundHandler);
 
 	// Read and run input commands.
 	char buf[100];
 	while(getcmd(buf, sizeof(buf)) >= 0){
+		buf[strlen(buf)-1] = 0;  // chop \n
 		if(buf[0] == 'c' && buf[1] == 'd' && buf[2] == ' '){
-			buf[strlen(buf)-1] = 0;  // chop \n
 			if(chdir(buf+3) < 0)
 				fprintf(stderr, "cannot cd %s\n", buf+3);
 		} else {
 
-			buf[strlen(buf)-1] = 0;  // chop \n
 
 			// see if it needs to run in the background
 			bool runInBackground = isBackgroundProc(buf, sizeof(buf));
 			int pid = fork1();
 
 			if(!runInBackground) { 
-				if(pid == 0)
+				if(pid == 0) {
 					runcmd(parsecmd(buf));
+				}
+				foregroundPid = pid;
 				wait(&pid);
 			}
 			else {
