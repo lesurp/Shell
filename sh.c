@@ -45,7 +45,7 @@ int fork1(void);  // Fork but exits on failure.
 struct cmd *parsecmd(char*);
 
 // Execute cmd.  Never returns.
-	void
+void
 runcmd(struct cmd *cmd)
 {
 	struct execcmd *ecmd;
@@ -64,21 +64,59 @@ runcmd(struct cmd *cmd)
 			ecmd = (struct execcmd*)cmd;
 			if(ecmd->argv[0] == 0)
 				exit(0);
-			execvp(ecmd->argv[0],ecmd->argv);
+			int result=execvp(ecmd->argv[0],ecmd->argv);
+			if(result == -1)
+				fprintf(stderr,"Sorry :( \n I couldn\'t find this commande : %s \n", ecmd->argv[0]);
 			break;
 
 		case '>':
+			rcmd = (struct redircmd *) cmd;
+			rcmd->fd = open(rcmd->file, rcmd->mode, 0666);
+			dup2(rcmd->fd, STDOUT_FILENO);
+			runcmd(rcmd->cmd);
+			break;
 		case '<':
 			rcmd = (struct redircmd*)cmd;
-			fprintf(stderr, "redir not implemented\n");
-			// Your code here ...
+			rcmd->fd = open(rcmd->file, rcmd->mode, 0666);
+    		dup2(rcmd->fd, STDIN_FILENO);
+    		if (rcmd->fd == -1)
+        		fprintf(stderr, "Sorry :( \nI couldn\'t open this file : %s \n",rcmd->file);
+        		break;
 			runcmd(rcmd->cmd);
 			break;
 
 		case '|':
 			pcmd = (struct pipecmd*)cmd;
-			fprintf(stderr, "pipe not implemented\n");
-			// Your code here ...
+			
+			int filedes[2]= {0};
+
+			switch (fork1 ())
+       		{
+		    	case 0:		/* Child */
+		    		if (close (filedes[1]) == -1)	/* Close unused write end */
+		    			fprintf(stderr, "pipe error\n");
+		                break;
+		    		dup2(filedes[0],STDIN_FILENO);
+		    		runcmd(pcmd->right);
+
+		    		if (close(filedes[0]) == -1 )
+		    			fprintf(stderr, "pipe error\n");
+		                break;
+	
+		        default:		/* Parent */
+				    if (close (filedes[0]) == -1)	/* Close unused read end */
+				    	fprintf(stderr, "pipe error\n");
+		                break;
+			 
+				    dup2(filedes[1],STDOUT_FILENO);
+				    runcmd(pcmd->left);
+
+				    if (close(filedes[1]) == -1)	/* Close unused read end */
+					    fprintf(stderr, "pipe error\n");
+
+				    break;
+        	}
+
 			break;
 
 	}
