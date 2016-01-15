@@ -138,15 +138,13 @@ getcmd(char *buf, int nbuf)
 
 pid_t* backgroundPidsList;
 int sizePidsList = 0;
-pid_t foregroundPid = -1;
+pid_t foregroundPid;
 
 	int
 main(void)
 {
 	signal(SIGCHLD, backgroundHandler);
 	signal(SIGINT, foregroundHandler);
-	signal(SIGQUIT, foregroundHandler);
-	signal(SIGHUP, foregroundHandler);
 
 	// Read and run input commands.
 	char buf[100];
@@ -168,7 +166,6 @@ main(void)
 				}
 				foregroundPid = pid;
 				wait(&pid);
-				foregroundPid = -1;
 			}
 			else {
 				addPidToList(backgroundPidsList, sizePidsList, pid);

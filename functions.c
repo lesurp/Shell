@@ -21,8 +21,19 @@ void backgroundHandler(int signum) {
 }
 
 void foregroundHandler(int signum) {
-	if(signum == SIGINT) 
-		kill(foregroundPid, SIGINT);
+	if(foregroundPid == -1)
+		return;
+	switch(signum) {
+		case SIGINT:
+			kill(foregroundPid, SIGINT);
+			break;
+		case SIGQUIT:
+			kill(foregroundPid, SIGQUIT);
+			break;
+		case SIGHUP:
+			kill(foregroundPid, SIGHUP);
+			break;
+	}
 
 }
 
