@@ -19,17 +19,18 @@ void backgroundHandler(int signum) {
 				if(isInTheList(backgroundPidsList,sizePidsList,pid)) {
 					printf("A background process has terminated: %ld\n\n", (long)pid);
 				}
-				continue;
-				break;
-				case SIGHUP:
-				for(i = 0; i < sizePidsList; i++){
-					kill(backgroundPidsList[i], SIGHUP);
-				}
-				exit(0);
-				break;
-			}	
-	}
+			continue;
+			}
+			break;
+		case SIGHUP:
+			for(i = 0; i < sizePidsList; i++){
+				kill(backgroundPidsList[i], SIGHUP);
+			}
+			exit(0);
+			break;
+	}	
 }
+
 
 void foregroundHandler(int signum) {
 	if(foregroundPid == -1) 

@@ -91,6 +91,7 @@ runcmd(struct cmd *cmd)
 			pcmd = (struct pipecmd*)cmd;
 
 			int filedes[2]= {0};
+			pipe(filedes);
 			switch (fork1())
 			{
 				case 0:		/* Child */
@@ -99,6 +100,7 @@ runcmd(struct cmd *cmd)
 					}
 					dup2(filedes[0],STDIN_FILENO);
 					runcmd(pcmd->right);
+					break;
 				case -1:
 					fprintf(stderr, "forking error\n");
 					break;
@@ -154,6 +156,7 @@ main(void)
 			int pid = fork1();
 
 			if(!runInBackground) { 
+				printf("process will start in foreground\n");
 				if(pid == 0) {
 					runcmd(parsecmd(buf));
 				}
@@ -162,6 +165,7 @@ main(void)
 				foregroundPid = -1;
 			}
 			else {
+				printf("process will start in background\n");
 				addPidToList(backgroundPidsList, sizePidsList, pid);
 				if(pid == 0) {
 					setpgrp();
