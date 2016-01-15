@@ -148,9 +148,9 @@ pid_t foregroundPid = -1;
 main(void)
 {
 	signal(SIGCHLD, backgroundHandler);
+	signal(SIGHUP, backgroundHandler);
 	signal(SIGINT, foregroundHandler);
 	signal(SIGQUIT, foregroundHandler);
-	signal(SIGHUP, foregroundHandler);
 
 	// Read and run input commands.
 	char buf[100];

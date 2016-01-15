@@ -12,26 +12,35 @@ bool isBackgroundProc(char* buf, int nbf) {
 
 void backgroundHandler(int signum) {
 	pid_t pid;
-	while ( (pid = waitpid(-1, NULL, WNOHANG)) > 0) {
-		if(isInTheList(backgroundPidsList,sizePidsList,pid)) {
-			printf("A background process has terminated: %ld\n\n", (long)pid);
-		}
-		continue;
+	int i;
+	switch(signum) {
+		case SIGCHLD:
+			while ( (pid = waitpid(-1, NULL, WNOHANG)) > 0) {
+				if(isInTheList(backgroundPidsList,sizePidsList,pid)) {
+					printf("A background process has terminated: %ld\n\n", (long)pid);
+				}
+				continue;
+				break;
+				case SIGHUP:
+				for(i = 0; i < sizePidsList; i++){
+					kill(backgroundPidsList[i], SIGHUP);
+				}
+				exit(0);
+				break;
+			}	
 	}
 }
 
 void foregroundHandler(int signum) {
-	if(foregroundPid == -1)
+	if(foregroundPid == -1) 
 		return;
+
 	switch(signum) {
 		case SIGINT:
 			kill(foregroundPid, SIGINT);
 			break;
 		case SIGQUIT:
 			kill(foregroundPid, SIGQUIT);
-			break;
-		case SIGHUP:
-			kill(foregroundPid, SIGHUP);
 			break;
 	}
 
