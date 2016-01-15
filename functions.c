@@ -49,17 +49,17 @@ void foregroundHandler(int signum) {
 }
 
 void addPidToList(pid_t* pidList, int size, pid_t pid) {
-	backgroundPidsList = realloc(pidList, (size+1)*sizeof(pid));
+	backgroundPidsList = realloc(backgroundPidsList, (size+1)*sizeof(pid));
 	backgroundPidsList[sizePidsList++] = pid;
 }
 
 bool isInTheList(pid_t* pidList,int size, pid_t pid) {
 	int i;
 	for(i =0 ; i < size; i++) {
-		if(pid == pidList[i]) {
-			pidList[i] = 0;
-			//pidList = realloc(pidList, (size-1)*sizeof(pid));
-			//size--;
+		if(pid == backgroundPidsList[i]) {
+			backgroundPidsList[i] = backgroundPidsList[size-1];
+			backgroundPidsList = realloc(backgroundPidsList, (size-1)*sizeof(pid));
+			size--;
 			return true;
 		}
 	}	
