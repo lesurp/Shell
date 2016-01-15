@@ -165,7 +165,7 @@ main(void)
 				foregroundPid = -1;
 			}
 			else {
-				addPidToList(backgroundPidsList, sizePidsList, pid);
+				addPidToList(sizePidsList, pid);
 				if(pid == 0) {
 					setpgrp();
 					runcmd(parsecmd(buf));

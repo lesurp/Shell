@@ -16,7 +16,7 @@ void backgroundHandler(int signum) {
 	switch(signum) {
 		case SIGCHLD:
 			while ( (pid = waitpid(-1, NULL, WNOHANG)) > 0) {
-				if(isInTheList(backgroundPidsList,sizePidsList,pid)) {
+				if(isInTheList(sizePidsList,pid)) {
 					printf("A background process has terminated: %ld\n\n", (long)pid);
 				}
 			continue;
@@ -48,12 +48,12 @@ void foregroundHandler(int signum) {
 
 }
 
-void addPidToList(pid_t* pidList, int size, pid_t pid) {
+void addPidToList(int size, pid_t pid) {
 	backgroundPidsList = realloc(backgroundPidsList, (size+1)*sizeof(pid));
 	backgroundPidsList[sizePidsList++] = pid;
 }
 
-bool isInTheList(pid_t* pidList,int size, pid_t pid) {
+bool isInTheList(int size, pid_t pid) {
 	int i;
 	for(i =0 ; i < size; i++) {
 		if(pid == backgroundPidsList[i]) {
