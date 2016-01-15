@@ -78,9 +78,12 @@ runcmd(struct cmd *cmd)
 		case '<':
 			rcmd = (struct redircmd*)cmd;
 			rcmd->fd = open(rcmd->file, rcmd->mode, 0666);
-			dup2(rcmd->fd, STDIN_FILENO);
-			if (rcmd->fd == -1)
-				fprintf(stderr, "Sorry :( \nI couldn\'t open this file : %s \n",rcmd->file);
+    		dup2(rcmd->fd, STDIN_FILENO);
+    		if (rcmd->fd == -1){
+        		fprintf(stderr, "Sorry :( \nI couldn\'t open this file : %s \n",rcmd->file);
+				break;
+			}
+
 			runcmd(rcmd->cmd);
 			break;
 
@@ -88,39 +91,31 @@ runcmd(struct cmd *cmd)
 			pcmd = (struct pipecmd*)cmd;
 
 			int filedes[2]= {0};
-
 			switch (fork1())
-			{
-				case 0:		/* Child */
-					if (close (filedes[1]) == -1)	/* Close unused write end */
-						fprintf(stderr, "pipe error\n");
-					break;
-					dup2(filedes[0],STDIN_FILENO);
-					runcmd(pcmd->right);
+       		{
+		    	case 0:		/* Child */
+		    		if (close (filedes[1]) == -1){	/* Close unused write end */
+		                break;
+					}
+		    		dup2(filedes[0],STDIN_FILENO);
+		    		runcmd(pcmd->right);
+		    		if (close(filedes[0]) == -1 ){
+		                break;
+					}
+		        default:		/* Parent */
+				    if (close (filedes[0]) == -1){	/* Close unused read end */
+		                break;
+			 		}
+				    dup2(filedes[1],STDOUT_FILENO);
+				    runcmd(pcmd->left);
 
-					if (close(filedes[0]) == -1 )
-						fprintf(stderr, "pipe error\n");
-					break;
-				case -1:
-					fprintf(stderr, "forking error\n");
-					break;
+				    if (close(filedes[1]) == -1)	/* Close unused read end */
+					    fprintf(stderr, "pipe error\n");
 
-				default:		/* Parent */
-					if (close (filedes[0]) == -1)	/* Close unused read end */
-						fprintf(stderr, "pipe error\n");
-					break;
-
-					dup2(filedes[1],STDOUT_FILENO);
-					runcmd(pcmd->left);
-
-					if (close(filedes[1]) == -1)	/* Close unused read end */
-						fprintf(stderr, "pipe error\n");
-
-					break;
-			}
+				    break;
+        	}
 
 			break;
-
 	}
 	exit(0);
 }
