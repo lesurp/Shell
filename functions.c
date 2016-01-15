@@ -45,8 +45,12 @@ void addPidToList(pid_t* pidList, int size, pid_t pid) {
 bool isInTheList(pid_t* pidList,int size, pid_t pid) {
 	int i;
 	for(i =0 ; i < size; i++) {
-		if(pid = pidList[i])
+		if(pid = pidList[i]) {
+			pidList[i] = pidList[size-1];
+			pidList = realloc(pidList, (size-1)*sizeof(pid));
+			size--;
 			return true;
+		}
 	}	
 	return false;	
 }

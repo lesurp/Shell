@@ -92,31 +92,35 @@ runcmd(struct cmd *cmd)
 			switch (fork1())
 			{
 				case 0:		/* Child */
-					if (close (filedes[1]) == -1)	/* Close unused write end */
+					if (close (filedes[1]) == -1){	/* Close unused write end */
 						fprintf(stderr, "pipe error\n");
 					break;
+					}
 					dup2(filedes[0],STDIN_FILENO);
 					runcmd(pcmd->right);
 
-					if (close(filedes[0]) == -1 )
+				/*	if (close(filedes[0]) == -1 ) {
 						fprintf(stderr, "pipe error\n");
 					break;
+					}*/
 				case -1:
 					fprintf(stderr, "forking error\n");
 					break;
 
 				default:		/* Parent */
-					if (close (filedes[0]) == -1)	/* Close unused read end */
+					if (close (filedes[0]) == -1){	/* Close unused read end */
 						fprintf(stderr, "pipe error\n");
 					break;
+					}
 
 					dup2(filedes[1],STDOUT_FILENO);
 					runcmd(pcmd->left);
 
-					if (close(filedes[1]) == -1)	/* Close unused read end */
+					/*if (close(filedes[1]) == -1)	// Close unused read end 
 						fprintf(stderr, "pipe error\n");
 
-					break;
+					break;*/
+					
 			}
 
 			break;
