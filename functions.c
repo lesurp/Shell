@@ -24,6 +24,7 @@ void backgroundHandler(int signum) {
 			break;
 		case SIGHUP:
 			for(i = 0; i < sizePidsList; i++){
+				if(backgroundPidsList[i] != 0)
 				kill(backgroundPidsList[i], SIGHUP);
 			}
 			exit(0);
@@ -55,10 +56,10 @@ void addPidToList(pid_t* pidList, int size, pid_t pid) {
 bool isInTheList(pid_t* pidList,int size, pid_t pid) {
 	int i;
 	for(i =0 ; i < size; i++) {
-		if(pid = pidList[i]) {
-			pidList[i] = pidList[size-1];
-			pidList = realloc(pidList, (size-1)*sizeof(pid));
-			size--;
+		if(pid == pidList[i]) {
+			pidList[i] = 0;
+			//pidList = realloc(pidList, (size-1)*sizeof(pid));
+			//size--;
 			return true;
 		}
 	}	

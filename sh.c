@@ -64,6 +64,7 @@ runcmd(struct cmd *cmd)
 			ecmd = (struct execcmd*)cmd;
 			if(ecmd->argv[0] == 0)
 				exit(0);
+			
 			int result=execvp(ecmd->argv[0],ecmd->argv);
 			if(result == -1)
 				fprintf(stderr,"Sorry :( \n I couldn\'t find this commande : %s \n", ecmd->argv[0]);
@@ -156,7 +157,6 @@ main(void)
 			int pid = fork1();
 
 			if(!runInBackground) { 
-				printf("process will start in foreground\n");
 				if(pid == 0) {
 					runcmd(parsecmd(buf));
 				}
@@ -165,7 +165,6 @@ main(void)
 				foregroundPid = -1;
 			}
 			else {
-				printf("process will start in background\n");
 				addPidToList(backgroundPidsList, sizePidsList, pid);
 				if(pid == 0) {
 					setpgrp();
